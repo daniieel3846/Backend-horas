@@ -105,9 +105,7 @@ public class Reporte {
 		Calendar objCalendario = Calendar.getInstance();
 		java.util.Date Fecha = formatter.parse(date); //obtiene la fecha de inicio y la  transforma a formato date
 		objCalendario.setTime(Fecha);
-		if(DiaDominical(date)==8) {
-			return objCalendario.get(Calendar.WEEK_OF_YEAR)-2;
-		}
+		if(DiaDominical(date)==8)return objCalendario.get(Calendar.WEEK_OF_YEAR)-2;
 		return objCalendario.get(Calendar.WEEK_OF_YEAR)-1;
 	}
 	//--------Se obtiene el dia Domingo------------
@@ -139,7 +137,8 @@ public class Reporte {
 		}
 		return madrugada+noche;
 	}
-	//Calcula las horas En fechas Iguales
+	
+	//Calcula las horas normales En fechas Iguales
 	public int CalcularHoras(int HoraInicio,int HoraFin) {
 		double HoraInicial=Minutos_a_Horas(HoraInicio);
 		double HoraFinal=Minutos_a_Horas(HoraFin);
@@ -187,18 +186,42 @@ public class Reporte {
 			if(CompararFechas(tecnico.getFecha_inicio(), tecnico.getFecha_fin(),numsemana)) {
 				int []array;
 				if(tecnico.getFecha_inicio().equalsIgnoreCase(tecnico.getFecha_fin())) {
-					array=Verificar_TotalHoras(total,horainicio,horafin,1);
-					if(horainicio>=420 && horainicio<1200 && horafin<=1200) { //Horas Normales
+					array=Verificar_TotalHoras(total,horainicio,horafin,1); //El array tiene los calculos hechos
+					if(horainicio>=420 && horainicio<1200 && horafin<=1200) { //Horas Normales   7 am 8 pm 
 						HorasNormales+=array[0];
 						HorasNormalExtra+=array[1];
-					}else if(horainicio>=1200 && horafin<=1380+59) { //23 horas: 59 minutos
+					}
+					if(horainicio>=1200 && horafin<=1380+59) { // Mitad de las horas nocturnas 8 pm 11:59 am
 						HorasNocturnas+=array[0];
 						HorasNocturnasExtra+=array[1];
 					}
-				}if(DiaDominical(tecnico.getFecha_inicio())==8) {
-					
-				
+					if(DiaDominical(tecnico.getFecha_inicio())==8) {
+						HorasDominicales+=array[0];
+						HorasDominicalesExtra+=array[1];
+					}
+				}else { //Si las fechas son diferentes
+					//Calcula las horas de un tecnico desde las 8 pm hasta las 7 am
+					if(horainicio>=1200 && horainicio<1440) {//hora de inicio entre las 8 pm y 12 am
+						if(horafin>=0 && horafin<=420) { //Hora de fin entre 12am a 7 am -- madrugada
+							array=Verificar_TotalHoras(total,horainicio,horafin,2);
+							HorasNocturnas+=array[0];
+							HorasNocturnasExtra+=array[1];
+						}
+					}
 				}
+			} //cierre for
+			total=HorasNormales+HorasNocturnas+HorasDominicales+HorasNormalExtra+HorasNocturnasExtra+HorasDominicalesExtra;
+		}
+		horas.add("Horas Normales: "+String.valueOf(HorasNormales));
+		horas.add("Horas Nocturnas: "+String.valueOf(HorasNocturnas));
+		horas.add("Horas Dominicales: "+String.valueOf(HorasDominicales));
+		horas.add("Horas Normales Extra: "+String.valueOf(HorasNormalExtra));
+		horas.add("Horas Nocturnas Extra: "+String.valueOf(HorasNocturnasExtra));
+		horas.add("Horas Dominicales Extra: "+String.valueOf(HorasDominicalesExtra));
+		horas.add("Total Horas: "+String.valueOf(total));
+		return horas;
+		//return String.valueOf(total);
+	}
 				/*else {
 					
 					
@@ -241,20 +264,10 @@ public class Reporte {
 							}
 					}
 				}*/
-			}
-			total=HorasNormales+HorasNocturnas+HorasDominicales+HorasNormalExtra+HorasNocturnasExtra+HorasDominicalesExtra;
-		}
+			
+			
 		
-		horas.add("Horas Normales: "+String.valueOf(HorasNormales));
-		horas.add("Horas Nocturnas: "+String.valueOf(HorasNocturnas));
-		horas.add("Horas Dominicales: "+String.valueOf(HorasDominicales));
-		horas.add("Horas Normales Extra: "+String.valueOf(HorasNormalExtra));
-		horas.add("Horas Nocturnas Extra: "+String.valueOf(HorasNocturnasExtra));
-		horas.add("Horas Dominicales Extra: "+String.valueOf(HorasDominicalesExtra));
-		horas.add("Total Horas: "+String.valueOf(total));
-		return horas;
-		//return String.valueOf(total);
-	}
+		
 	
 	
 	//------------------Metodos prueba -- en desarrollo-----------------
