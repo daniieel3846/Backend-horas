@@ -158,7 +158,7 @@ public class Reporte {
 		return array;
 	}
 	
-	public int[] CalcularHoras24HorasSeguidas(int HoraInicio,int HoraFin,int total) {
+	/*public int[] CalcularHoras24HorasSeguidas(int HoraInicio,int HoraFin,int total) {
 		double HoraInicial=Minutos_a_Horas(HoraInicio);
 		double HoraFinal=Minutos_a_Horas(HoraFin);
 		int []array=new int[4];
@@ -199,7 +199,7 @@ public class Reporte {
 		array[3]=normalExtra;
 		
 		return array;
-	}
+	}*/
 	public int[] CalcularHoras24HorasSeguidasV2(int HoraInicio,int HoraFin,int total) {
 		double HoraInicial=Minutos_a_Horas(HoraInicio);
 		//double HoraFinal=Minutos_a_Horas(HoraFin);
@@ -251,9 +251,12 @@ public class Reporte {
 		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
 		int []array=new int[4];
 		while(HoraInicial<HoraFinal) {
+			
 			if(HoraInicial>=20) {//horario de 8 a 12 de la noche
 				if(total+resultado>48) {
-					nocheExtra+=1;
+					int []array2=Verificar_TotalHorasV3(total,resultado);
+					noche+=array2[0];
+					nocheExtra+=array2[1];
 				}else {
 					noche+=1;
 				}
@@ -284,6 +287,25 @@ public class Reporte {
 		array[3]=normalExtra;
 		
 		
+		return array;
+	}
+	public int[] Verificar_TotalHorasV3(int total,int r) {
+		int horasHechas=r;
+		//horasHechas=CalcularHoras(hour1,hour2);
+				
+		int []array=new int[2];
+		int horaNormal=0;
+		if(total+horasHechas>48) {
+		for(;total<48;total++) {
+			horaNormal++;
+			horasHechas--; 
+		}
+		array[0]=horaNormal; //horas menores a 48
+		array[1]=horasHechas; //horas mayores a 48
+		}else {
+			array[0]=horasHechas; //horas normales
+			array[1]=0;
+		}
 		return array;
 	}
 	
@@ -325,7 +347,7 @@ public class Reporte {
 						HorasDominicalesExtra+=array[1];
 					}*/
 				}else { //Si las fechas son diferentes
-					array=CalcularHoras24HorasSeguidas(horainicio,horafin,total); //Calcula las horas de el tecnico en las 24 horas;
+					array=CalcularHoras24HorasSeguidasV2(horainicio,horafin,total); //Calcula las horas de el tecnico en las 24 horas;
 					HorasNocturnas+=array[0];
 					HorasNocturnasExtra+=array[1];
 					HorasNormales+=array[2];
