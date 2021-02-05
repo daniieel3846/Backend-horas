@@ -177,6 +177,118 @@ public class Reporte {
 		return array;
 	}
 	
+	public int[] CalcularHoras24HorasSeguidas(int HoraInicio,int HoraFin,int total) {
+		double HoraInicial=Minutos_a_Horas(HoraInicio);
+		double HoraFinal=Minutos_a_Horas(HoraFin);
+		int []array=new int[4];
+		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
+		while(HoraInicial<24) { //horario de 8 a 12 de la noche
+			noche+=1;
+			HoraInicial++;
+		}
+		while(0<HoraFinal) {
+			
+			if(HoraFinal>20) {
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					noche+=1;
+				}
+				
+			}else if(HoraFinal>7 && HoraFinal<20) {
+				if(total+resultado>48) {
+					normalExtra+=1;
+				}else {
+					normal+=1;
+				}
+				
+			}else {
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					madrugada+=1;
+				}
+			}
+			HoraFinal--;
+		}
+		resultado=madrugada+noche+normal;
+		array[0]=madrugada+noche;
+		array[1]=nocheExtra;
+		array[2]=normal;
+		array[3]=normalExtra;
+		
+		return array;
+	}
+	public int[] CalcularHoras24HorasSeguidasV2(int HoraInicio,int HoraFin,int total) {
+		double HoraInicial=Minutos_a_Horas(HoraInicio);
+		double HoraFinal=Minutos_a_Horas(HoraFin);
+		int []array=new int[4];
+		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
+		if(HoraInicial>=20) {
+			while(HoraInicial<24) { //horario de 8 a 12 de la noche
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					noche+=1;
+				}
+				HoraInicial++;
+			}
+		}
+		if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
+			while(HoraInicial<20) { //horario de 8 a 12 de la noche
+				if(total+resultado>48) {
+					normalExtra+=1;
+				}else {
+					normal+=1;
+				}
+				HoraInicial++;
+			}
+		}
+		if(HoraInicial>=0 && HoraInicial<7) {
+			while(HoraInicial<7) { //horario de 12 am a 7 am 
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					madrugada+=1;
+				}
+				HoraInicial++;
+			}
+		}
+		
+		/*while(0<HoraFinal) {
+			
+			if(HoraFinal>20) {
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					noche+=1;
+				}
+				
+			}else if(HoraFinal>7 && HoraFinal<20) {
+				if(total+resultado>48) {
+					normalExtra+=1;
+				}else {
+					normal+=1;
+				}
+				
+			}else {
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					madrugada+=1;
+				}
+			}
+			HoraFinal--;
+		}*/
+		resultado=madrugada+noche+normal;
+		array[0]=madrugada+noche;
+		array[1]=nocheExtra;
+		array[2]=normal;
+		array[3]=normalExtra;
+		
+		return array;
+	}
+	
 	public List<String> HorasSemanalV2(ArrayList<Reporte> Listatecnico,String numsemana) throws ParseException{
 		int HorasNormales=0, HorasNocturnas=0,HorasDominicales=0,HorasNormalExtra=0, HorasNocturnasExtra=0,HorasDominicalesExtra=0,total=0;
 		ArrayList <String> horas=new ArrayList<String>();
@@ -184,9 +296,12 @@ public class Reporte {
 			int horainicio=CalcularMinutos(tecnico.getHora_inicio());//--------Horas convertidas a minutos-----------
 			int horafin=CalcularMinutos(tecnico.getHora_fin());
 			if(CompararFechas(tecnico.getFecha_inicio(), tecnico.getFecha_fin(),numsemana)) {
-				int []array;
+				int []array = null;
 				if(tecnico.getFecha_inicio().equalsIgnoreCase(tecnico.getFecha_fin())) {
-					array=Verificar_TotalHoras(total,horainicio,horafin,1); //El array tiene los calculos hechos
+					if(horainicio<horafin) {
+						array=Verificar_TotalHoras(total,horainicio,horafin,1); //El array tiene los calculos hechos
+					}
+					
 					if(horainicio>=420 && horainicio<1200 && horafin<=1200) { //Horas Normales   7 am 8 pm 
 						HorasNormales+=array[0];
 						HorasNormalExtra+=array[1];
@@ -201,13 +316,26 @@ public class Reporte {
 					}
 				}else { //Si las fechas son diferentes
 					//Calcula las horas de un tecnico desde las 8 pm hasta las 7 am
-					if(horainicio>=1200 && horainicio<1440) {//hora de inicio entre las 8 pm y 12 am
-						if(horafin>=0 && horafin<=420) { //Hora de fin entre 12am a 7 am -- madrugada
+					if(horainicio>=1200 && horafin<=1200) {//hora de inicio entre las 8 pm y 12 am
+						/*if(horafin>=0 && horafin<=420) { //Hora de fin entre 12am a 7 am -- madrugada
 							array=Verificar_TotalHoras(total,horainicio,horafin,2);
 							HorasNocturnas+=array[0];
 							HorasNocturnasExtra+=array[1];
-						}
+						}*/
+						//En caso de que el tecnico trabaje desde las 8 pm hasta las 8 pm del siguiente Dia 
+						
+						//if(horafin>420 && horafin<=1200) { //Hora de fin entre 7 Am a 8 pm
+							array=CalcularHoras24HorasSeguidas(horainicio,horafin,total);
+							HorasNocturnas+=array[0];
+							HorasNocturnasExtra+=array[1];
+							HorasNormales+=array[2];
+							HorasNormalExtra+=array[3];
+						//}
 					}
+					if(horainicio<1200 ) {
+						
+					}
+					
 				}
 			} //cierre for
 			total=HorasNormales+HorasNocturnas+HorasDominicales+HorasNormalExtra+HorasNocturnasExtra+HorasDominicalesExtra;
@@ -311,48 +439,7 @@ public class Reporte {
 			//return String.valueOf(total);
 		}*/
 	
-	public int[] CalcularHorasV3(int HoraInicio,int HoraFin,int total) {
-		double HoraInicial=Minutos_a_Horas(HoraInicio);
-		double HoraFinal=Minutos_a_Horas(HoraFin);
-		int []array=new int[4];
-		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
-		while(HoraInicial<24) { //horario de 8 a 12 de la noche
-			noche+=1;
-			HoraInicial++;
-		}
-		while(0<HoraFinal) {
-			
-			if(HoraFinal>20) {
-				if(total+resultado>48) {
-					nocheExtra+=1;
-				}else {
-					noche+=1;
-				}
-				
-			}else if(HoraFinal>7 && HoraFinal<20) {
-				if(total+resultado>48) {
-					normalExtra+=1;
-				}else {
-					normal+=1;
-				}
-				
-			}else {
-				if(total+resultado>48) {
-					nocheExtra+=1;
-				}else {
-					madrugada+=1;
-				}
-			}
-			HoraFinal--;
-		}
-		resultado=madrugada+noche+normal;
-		array[0]=madrugada+noche;
-		array[1]=nocheExtra;
-		array[2]=normal;
-		array[3]=normalExtra;
-		
-		return array;
-	}
+	
 	
 	public int[] CalcularHorasV25(int HoraInicio,int HoraFin,int total) {
 		double HoraInicial=Minutos_a_Horas(HoraInicio);
