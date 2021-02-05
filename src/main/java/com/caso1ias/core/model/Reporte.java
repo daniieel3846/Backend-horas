@@ -123,20 +123,7 @@ public class Reporte {
 	    }
 	}
 	
-	public int CalcularHorasV2(int HoraInicio,int HoraFin) {
-		double HoraInicial=Minutos_a_Horas(HoraInicio);
-		double HoraFinal=Minutos_a_Horas(HoraFin);
-		int noche=0,madrugada=0;
-		while(HoraInicial<24) {
-			noche+=1;
-			HoraInicial++;
-		}
-		while(0<HoraFinal) {
-			madrugada+=1;
-			HoraFinal--;
-		}
-		return madrugada+noche;
-	}
+	
 	
 	//Calcula las horas normales En fechas Iguales
 	public int CalcularHoras(int HoraInicio,int HoraFin) {
@@ -151,16 +138,10 @@ public class Reporte {
 	}
 	
 	//-----------Metodo Usado en las Horas Normales --------- Fechas Iguales
-	public int[] Verificar_TotalHoras(int total,int hour1, int hour2,int c) {
+	public int[] Verificar_TotalHoras(int total,int hour1, int hour2) {
 		int horasHechas=0;
-		switch(c) {
-			case 1:
-				horasHechas=CalcularHoras(hour1,hour2);
-				break;
-			case 2:
-				horasHechas=CalcularHorasV2(hour1,hour2);
-				break;
-		}
+		horasHechas=CalcularHoras(hour1,hour2);
+				
 		int []array=new int[2];
 		int horaNormal=0;
 		if(total+horasHechas>48) {
@@ -221,7 +202,7 @@ public class Reporte {
 	}
 	public int[] CalcularHoras24HorasSeguidasV2(int HoraInicio,int HoraFin,int total) {
 		double HoraInicial=Minutos_a_Horas(HoraInicio);
-		double HoraFinal=Minutos_a_Horas(HoraFin);
+		//double HoraFinal=Minutos_a_Horas(HoraFin);
 		int []array=new int[4];
 		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
 		if(HoraInicial>=20) {
@@ -235,7 +216,7 @@ public class Reporte {
 			}
 		}
 		if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
-			while(HoraInicial<20) { //horario de 8 a 12 de la noche
+			while(HoraInicial<20) { 
 				if(total+resultado>48) {
 					normalExtra+=1;
 				}else {
@@ -254,37 +235,54 @@ public class Reporte {
 				HoraInicial++;
 			}
 		}
+		resultado=madrugada+noche+normal;
+		array[0]=madrugada+noche;
+		array[1]=nocheExtra;
+		array[2]=normal;
+		array[3]=normalExtra;
 		
-		/*while(0<HoraFinal) {
-			
-			if(HoraFinal>20) {
+		
+		return array;
+	}
+	public int[] Verificar_TotalHorasV2(int total,int hourinicio, int hourfin) {
+		double HoraInicial=Minutos_a_Horas(hourinicio);
+		double HoraFinal=Minutos_a_Horas(hourfin);
+		//int horasHechas=CalcularHoras(hourinicio,hourfin);
+		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
+		int []array=new int[4];
+		while(HoraInicial<HoraFinal) {
+			if(HoraInicial>=20) {//horario de 8 a 12 de la noche
 				if(total+resultado>48) {
 					nocheExtra+=1;
 				}else {
 					noche+=1;
 				}
-				
-			}else if(HoraFinal>7 && HoraFinal<20) {
+			}
+			if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
 				if(total+resultado>48) {
 					normalExtra+=1;
 				}else {
 					normal+=1;
 				}
-				
-			}else {
+			}
+			if(HoraInicial>=0 && HoraInicial<7) { //horario de 12 am a 7 am 
 				if(total+resultado>48) {
 					nocheExtra+=1;
 				}else {
 					madrugada+=1;
 				}
 			}
-			HoraFinal--;
-		}*/
+			
+			
+			HoraInicial++;
+		}
+		
 		resultado=madrugada+noche+normal;
 		array[0]=madrugada+noche;
 		array[1]=nocheExtra;
 		array[2]=normal;
 		array[3]=normalExtra;
+		
 		
 		return array;
 	}
@@ -299,43 +297,43 @@ public class Reporte {
 				int []array = null;
 				if(tecnico.getFecha_inicio().equalsIgnoreCase(tecnico.getFecha_fin())) {
 					if(horainicio<horafin) {
-						array=Verificar_TotalHoras(total,horainicio,horafin,1); //El array tiene los calculos hechos
+						array=Verificar_TotalHorasV2(total,horainicio,horafin); //El array tiene los calculos hechos
 					}
-					
+					HorasNocturnas+=array[0];
+					HorasNocturnasExtra+=array[1];
+					HorasNormales+=array[2];
+					HorasNormalExtra+=array[3];	
+					if(DiaDominical(tecnico.getFecha_inicio())==8) {
+						HorasDominicales+=array[0]+array[2];
+						HorasDominicalesExtra+=array[1]+array[3];
+					}
+					/*
 					if(horainicio>=420 && horainicio<1200 && horafin<=1200) { //Horas Normales   7 am 8 pm 
 						HorasNormales+=array[0];
 						HorasNormalExtra+=array[1];
 					}
-					if(horainicio>=1200 && horafin<=1380+59) { // Mitad de las horas nocturnas 8 pm 11:59 am
+					if(horainicio>=1200 && horafin<1440) { // Mitad de las horas nocturnas 8 pm a 12 am
+						HorasNocturnas+=array[0];
+						HorasNocturnasExtra+=array[1];
+					}
+					if(horainicio>=0 && horainicio<420) { // Horas nocturnas de madrugada 12 am a 7 am
 						HorasNocturnas+=array[0];
 						HorasNocturnasExtra+=array[1];
 					}
 					if(DiaDominical(tecnico.getFecha_inicio())==8) {
 						HorasDominicales+=array[0];
 						HorasDominicalesExtra+=array[1];
-					}
+					}*/
 				}else { //Si las fechas son diferentes
-					//Calcula las horas de un tecnico desde las 8 pm hasta las 7 am
-					if(horainicio>=1200 && horafin<=1200) {//hora de inicio entre las 8 pm y 12 am
-						/*if(horafin>=0 && horafin<=420) { //Hora de fin entre 12am a 7 am -- madrugada
-							array=Verificar_TotalHoras(total,horainicio,horafin,2);
-							HorasNocturnas+=array[0];
-							HorasNocturnasExtra+=array[1];
-						}*/
-						//En caso de que el tecnico trabaje desde las 8 pm hasta las 8 pm del siguiente Dia 
-						
-						//if(horafin>420 && horafin<=1200) { //Hora de fin entre 7 Am a 8 pm
-							array=CalcularHoras24HorasSeguidas(horainicio,horafin,total);
-							HorasNocturnas+=array[0];
-							HorasNocturnasExtra+=array[1];
-							HorasNormales+=array[2];
-							HorasNormalExtra+=array[3];
-						//}
+					array=CalcularHoras24HorasSeguidas(horainicio,horafin,total); //Calcula las horas de el tecnico en las 24 horas;
+					HorasNocturnas+=array[0];
+					HorasNocturnasExtra+=array[1];
+					HorasNormales+=array[2];
+					HorasNormalExtra+=array[3];	
+					if(DiaDominical(tecnico.getFecha_inicio())==8) {
+						HorasDominicales+=array[0]+array[2];
+						HorasDominicalesExtra+=array[1]+array[3];
 					}
-					if(horainicio<1200 ) {
-						
-					}
-					
 				}
 			} //cierre for
 			total=HorasNormales+HorasNocturnas+HorasDominicales+HorasNormalExtra+HorasNocturnasExtra+HorasDominicalesExtra;
@@ -501,32 +499,7 @@ public class Reporte {
 	}
 	
 	
-	public int[] Verificar_TotalHorasV2(int total,int hour1, int hour2,int c) {
-		int horasHechas=0;
-		int []hora = null;
-		switch(c) {
-			case 1:
-				horasHechas=CalcularHoras(hour1,hour2);
-				break;
-			case 2:
-				//hora=CalcularHorasV(hour1,hour2);
-				break;
-		}
-		
-		int []array=new int[2];
-		int horaNormal=0;
-		if(total+horasHechas>48) {
-		for(;total<48;total++) {
-			horaNormal++;
-			horasHechas--; 
-		}
-		array[0]=horaNormal; //horas menores a 48
-		array[1]=horasHechas; //horas mayores a 48
-		}else {
-			array[0]=horasHechas; //horas normales
-			array[1]=0;
-		}
-		return hora;
-	}
+	
+	
 
 }
