@@ -240,29 +240,25 @@ public class Reporte {
 		array[1]=nocheExtra;
 		array[2]=normal;
 		array[3]=normalExtra;
-		
-		
 		return array;
 	}
-	public int[] Verificar_TotalHorasV2(int total,int hourinicio, int hourfin) {
+	//---Metodo que calcula las horas cando las fechas son iguales-------------
+	public int[] HorasSemanal_Fechas_iguales(int total,int hourinicio, int hourfin) {
 		double HoraInicial=Minutos_a_Horas(hourinicio);
 		double HoraFinal=Minutos_a_Horas(hourfin);
-		//int horasHechas=CalcularHoras(hourinicio,hourfin);
-		int noche=0,madrugada=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
+		int noche=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
+		boolean sw=false; 
 		int []array=new int[4];
 		while(HoraInicial<HoraFinal) {
-			
 			if(HoraInicial>=20) {//horario de 8 a 12 de la noche
 				if(total+resultado>48) {
-					int []array2=Verificar_TotalHorasV3(total,resultado);
-					noche+=array2[0];
-					nocheExtra+=array2[1];
+					nocheExtra+=1;
 				}else {
 					noche+=1;
 				}
 			}
 			if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
-				if(total+resultado>48) {
+				if(total+resultado>48) {  //entra a la condicion solo cuando se ingresa otro nuevo
 					normalExtra+=1;
 				}else {
 					normal+=1;
@@ -272,41 +268,62 @@ public class Reporte {
 				if(total+resultado>48) {
 					nocheExtra+=1;
 				}else {
-					madrugada+=1;
+					noche+=1;
 				}
 			}
-			
-			
 			HoraInicial++;
 		}
-		
-		resultado=madrugada+noche+normal;
-		array[0]=madrugada+noche;
+		resultado=noche+normal;
+		if(total+resultado>48 && sw==false) { //cuando llega a los 48 por primera vez
+			sw=true; //true para que no vuelva a entrar a la condicion
+			normal=0;
+			noche=0;
+			HoraInicial=Minutos_a_Horas(hourinicio);
+			HoraFinal=Minutos_a_Horas(hourfin);
+			while(HoraInicial<HoraFinal) {
+				if(HoraInicial>=20) {//horario de 8 a 12 de la noche
+					if(total<48) {
+						noche+=1;
+					}else {
+						nocheExtra+=1;
+					}
+				}
+				if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
+					if(total<48) {
+						normal+=1;
+					}else {
+						normalExtra+=1;
+					}
+				}
+				if(HoraInicial>=0 && HoraInicial<7) { //horario de 12 am a 7 am 
+					if(total<48) {
+						noche+=1;
+					}else {
+						nocheExtra+=1;
+					}
+				}
+				HoraInicial++;
+				total++;
+			}
+		}
+		array[0]=noche;
 		array[1]=nocheExtra;
 		array[2]=normal;
 		array[3]=normalExtra;
-		
-		
 		return array;
 	}
-	public int[] Verificar_TotalHorasV3(int total,int r) {
-		int horasHechas=r;
-		//horasHechas=CalcularHoras(hour1,hour2);
-				
-		int []array=new int[2];
-		int horaNormal=0;
-		if(total+horasHechas>48) {
+	
+	public int[] Verificar_TotalHorasV3(int total,int result) {
+		int []vectorHoras=new int[2];
+		int horaMenor48=0;
+		int horaMayor48=result;
 		for(;total<48;total++) {
-			horaNormal++;
-			horasHechas--; 
+			horaMenor48++;
+			horaMayor48--; 
 		}
-		array[0]=horaNormal; //horas menores a 48
-		array[1]=horasHechas; //horas mayores a 48
-		}else {
-			array[0]=horasHechas; //horas normales
-			array[1]=0;
-		}
-		return array;
+		vectorHoras[0]=horaMenor48; //horas menores a 48
+		vectorHoras[1]=horaMayor48; //horas mayores a 48
+		return vectorHoras;
 	}
 	
 	public List<String> HorasSemanalV2(ArrayList<Reporte> Listatecnico,String numsemana) throws ParseException{
@@ -319,7 +336,7 @@ public class Reporte {
 				int []array = null;
 				if(tecnico.getFecha_inicio().equalsIgnoreCase(tecnico.getFecha_fin())) {
 					if(horainicio<horafin) {
-						array=Verificar_TotalHorasV2(total,horainicio,horafin); //El array tiene los calculos hechos
+						array=HorasSemanal_Fechas_iguales(total,horainicio,horafin); //El array tiene los calculos hechos
 					}
 					HorasNocturnas+=array[0];
 					HorasNocturnasExtra+=array[1];
@@ -520,7 +537,121 @@ public class Reporte {
 	
 	}
 	
-	
+	public int[] Verificar_TotalHorasV255(int total,int hourinicio, int hourfin) {
+		double HoraInicial=Minutos_a_Horas(hourinicio);
+		double HoraFinal=Minutos_a_Horas(hourfin);
+		int noche=0,normal=0,nocheExtra=0,normalExtra=0,resultado=0;
+		boolean sw=false; 
+		//boolean sw2=true;
+		int []array=new int[4];
+		
+		while(HoraInicial<HoraFinal) {
+			if(HoraInicial>=20) {//horario de 8 a 12 de la noche
+				//sw2=false;
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					
+					noche+=1;
+				}
+			}
+			if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
+				//sw2=true;
+				if(total+resultado>48) {  //entra a la condicion solo cuando se ingresa otro nuevo
+					normalExtra+=1;
+				}else {
+					normal+=1;
+				}
+			}
+			
+			if(HoraInicial>=0 && HoraInicial<7) { //horario de 12 am a 7 am 
+				//sw2=false;
+				if(total+resultado>48) {
+					nocheExtra+=1;
+				}else {
+					noche+=1;
+				}
+			}
+			HoraInicial++;
+		}
+		resultado=noche+normal;
+		
+		
+		/*int horaMenor48Normal=0;
+		int horaMayor48NormalExtra=0;
+		int horaMenor48Nocturna=0;
+		int horaMayor48NocturnaExtra=0;*/
+		
+		if(total+resultado>48 && sw==false) { //cuando llega a los 48 por primera vez
+			//int horaMenor48=0; //horas menores a 48
+			//int horaMayor48=resultado;//horas mayores a 48
+			sw=true; //true para que no vuelva a entrar a la condicion
+			normal=0;
+			noche=0;
+			//int []array3=Verificar_TotalHorasV3(total,resultado);
+			//------------------INICIO----------
+			while(HoraInicial<HoraFinal) {
+				if(HoraInicial>=20) {//horario de 8 a 12 de la noche
+					if(total<48) {
+						noche++;
+					}else {
+						nocheExtra++;
+					}
+					//horaMenor48++;
+					//horaMayor48--;
+				}
+				if(HoraInicial>=7 && HoraInicial<20) { //horario de 7 am a 8 pm
+					if(total<48) {
+						normal++;
+					}else {
+						normalExtra++;
+					}
+					//horaMenor48++;
+					//horaMayor48--;
+				}
+				
+				if(HoraInicial>=0 && HoraInicial<7) { //horario de 12 am a 7 am 
+					if(total<48) {
+						noche++;
+					}else {
+						nocheExtra++;
+					}
+					//horaMenor48++;
+					//horaMayor48--;
+				}
+				HoraInicial++;
+				total++;
+			}
+			
+			array[0]=noche;
+			array[1]=nocheExtra;
+			array[2]=normal;
+			array[3]=normalExtra;
+			/*array[0]=horaMenor48Nocturna;
+			array[1]=horaMayor48NocturnaExtra;
+			array[2]=horaMenor48Normal;
+			array[3]=horaMayor48NormalExtra;
+			*/
+			
+			//------------------FIN
+			//int []array3=Verificar_TotalHorasV3(total,resultado);
+		
+			/*if(sw2) {
+				horaMenor48Normal=array3[0];
+				horaMayor48NormalExtra=array3[1];
+			}else {
+				horaMenor48Nocturna=array3[0];
+				horaMayor48NocturnaExtra=array3[1];
+			}*/
+			
+		}else {
+			array[0]=noche;
+			array[1]=nocheExtra;
+			array[2]=normal;
+			array[3]=normalExtra;
+		}
+		return array;
+	}
 	
 	
 
