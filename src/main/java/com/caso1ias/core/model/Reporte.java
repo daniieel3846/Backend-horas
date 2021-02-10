@@ -77,6 +77,34 @@ public class Reporte {
 	public String getHora_fin() {
 		return hora_fin;
 	}
+	public String Validaciones(String fechaIni,String fechaFi,String horaIni,String horaFi) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		java.util.Date FechaI = formatter.parse(fechaIni);
+		java.util.Date FechaII = formatter.parse(fechaFi);
+		Calendar objCalendario = Calendar.getInstance(); 
+		objCalendario.setTime(FechaI); //enviar la fecha recibida
+		int diaIni=objCalendario.get(Calendar.DATE);
+		objCalendario.setTime(FechaII);
+		int diaFin=objCalendario.get(Calendar.DATE);
+		if(FechaI.after(FechaII)) { //si fechainicio es mayor posterior a fechafin
+			return "La fecha de inicio debe ser menor que la fecha de fin";
+		}
+		if(FechaI.equals(FechaII)) {
+			int horaI=CalcularMinutos(horaIni);
+			int horaF=CalcularMinutos(horaFi);
+			if(horaI>horaF) {
+				return "Ingresa una hora de fin valida";
+			}
+		}
+		return "ok";
+		
+		//int mes = objCalendario.get(Calendar.MONTH)+1;
+		//int dia = objCalendario.get(Calendar.DATE);
+       // int annio = objCalendario.get(Calendar.YEAR);
+		
+		
+		
+	}
 	public int Horas_a_Minutos(int Horas) {
 		return Horas*60; //1 Hora = 60 Minutos
 	}
@@ -308,6 +336,15 @@ public class Reporte {
 			HoraFinal--;
 		}
 		resultado=noche+normal;
+		
+		if(total+resultado+domingo>48) {
+			int horarioNormal=total+resultado;
+			int []vectorHoras=RepartirHorasDomingo(horarioNormal,domingo);
+			domingo=vectorHoras[0];
+			domingoExtra=vectorHoras[1];
+		}
+		
+		
 		if(total+resultado>48 && sw==false) { //cuando llega a los 48 por primera vez
 			sw=true; //true para que no vuelva a entrar a la condicion
 			normal=0;
@@ -353,6 +390,7 @@ public class Reporte {
 					}else {
 						nocheExtra+=1;
 					}
+					//------------------ ver
 					if(bandera1) {
 						if(total<=48) {
 							noche-=1;
@@ -367,6 +405,7 @@ public class Reporte {
 					}else {
 						normalExtra+=1;
 					}
+					//------------------ ver
 					if(bandera1) {
 						if(total<=48) {
 							normal-=1;
@@ -382,10 +421,11 @@ public class Reporte {
 					}else {
 						nocheExtra+=1;
 					}
-					
+					//----------Funcional-------
 					if(bandera1) {
 						if(total<=48) {
 							noche-=1;
+							
 						}else {
 							nocheExtra-=1;
 						}
@@ -395,6 +435,7 @@ public class Reporte {
 				HoraFinal--;
 				total++;
 			}
+			
 		}
 		array[0]=noche;
 		array[1]=nocheExtra;
@@ -404,15 +445,48 @@ public class Reporte {
 		array[5]=0;
 		if(diaD2==8) {
 			array[0]=noche;
-			array[1]=nocheExtra; //evita que el total se sume a las extras
+			array[1]=nocheExtra; 
 			array[2]=normal;
 			array[3]=normalExtra;
 			array[4]=domingo;
 			array[5]=domingoExtra;
+			
 		}
 		return array;
 	}
-	public List<String> HorasSemanalV2(ArrayList<Reporte> Listatecnico,String numsemana) throws ParseException{
+	
+	public int[] Verificar_TotalHoras(int total,int hour1, int hour2) {
+		int horasHechas=0;
+		int []array=new int[2];
+		int horaNormal=0;
+		if(total+horasHechas>48) {
+		for(;total<48;total++) {
+			horaNormal++;
+			horasHechas--; 
+		}
+		array[0]=horaNormal; //horas menores a 48
+		array[1]=horasHechas; //horas mayores a 48
+		}else {
+			array[0]=horasHechas; //horas normales
+			array[1]=0;
+		}
+		return array;
+	}
+	//Metodo usado para verificar las horas dominicales
+	public int[] RepartirHorasDomingo(int total,int horasDomingo) {
+		int []vectorHoras=new int[2];
+		int horaMenor48=0;
+		int horaMayor48=horasDomingo;
+		for(;total<48;total++) {
+			horaMenor48++;
+			horaMayor48--; 
+		}
+		vectorHoras[0]=horaMenor48; //horas menores a 48
+		vectorHoras[1]=horaMayor48; //horas mayores a 48
+		return vectorHoras;
+	}
+	
+	public List<String> HorasSemanales(ArrayList<Reporte> Listatecnico,String numsemana) throws ParseException{
 		int HorasNormales=0, HorasNocturnas=0,HorasDominicales=0,HorasNormalExtra=0, HorasNocturnasExtra=0,HorasDominicalesExtra=0,total=0;
 		ArrayList <String> horas=new ArrayList<String>();
 		for(Reporte tecnico:Listatecnico) {

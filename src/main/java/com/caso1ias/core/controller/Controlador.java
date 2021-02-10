@@ -26,48 +26,42 @@ public class Controlador {
 	ReporteService service;
 	//---------------Modulo de Reporte de Servicio---------
 	@PostMapping("/reporte")
-	public String agregar(@Valid @RequestBody Reporte r, BindingResult result) {
+	public String agregar(@Valid @RequestBody Reporte r, BindingResult result) throws ParseException {
+		//------Validacion de errores----
 		if(result.hasErrors()) {
 			List<FieldError> errores = result.getFieldErrors();
 		    for (FieldError error : errores ) {
 		        return (error.getDefaultMessage());
 		    }
 		}
-		service.agregar(r);
-		return "Reporte Registrado Correctamente";
+		//Validacion de datos
+		String fecha1=r.getFecha_inicio(),fecha2=r.getFecha_fin(),hora1=r.getHora_inicio(),hora2=r.getHora_fin();
+		String respuesta=r.Validaciones(fecha1,fecha2,hora1,hora2);
+		if(respuesta.equals("ok")) {
+			service.agregar(r);
+			return "Reporte Registrado Correctamente";
+		}else {
+			return respuesta;
+		}
 	}
 	//---------------Modulo de Calculo de horas de trabajo--------------
 	@GetMapping("/recibir/{idtecnico}/{numsemana}")
 	public List<String> listarId(@PathVariable("idtecnico") String idtecnico,@PathVariable("numsemana") String numsemana) throws ParseException{
 		ArrayList <Reporte> Listatecnico=new ArrayList<Reporte>(); //Arraylist de tipo Reporte
 		ArrayList <String> horas=new ArrayList<String>();
-		//String h="0";
+		horas.add("Total Horas: 0");
 		if(!service.buscarTecnico(idtecnico).isEmpty()){  //Invoca el metodo que busca el id del tecnico
 			Listatecnico=(ArrayList<Reporte>) service.buscarTecnico(idtecnico); //Llena el arraylist con la info del tecnico
 			Reporte r=new Reporte();
-			//h="Total de Horas trabajadas: "+r.HorasSemanal(Listatecnico,numsemana);
-			horas=(ArrayList<String>) r.HorasSemanalV2(Listatecnico,numsemana);
+			horas=(ArrayList<String>) r.HorasSemanales(Listatecnico,numsemana);
 		}
 		return horas;
 	}
-	/*
-	@GetMapping("/prueba")
-	public int retornando() throws ParseException {
-		
-		String miFecha="2021-02-07";
-		//int numseman=4;
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		java.util.Date FechaI = formatter.parse(miFecha);
-		Calendar objCalendario = Calendar.getInstance(); //Obtiene la fecha actual
-		//int semanaActual= objCalendario.get(Calendar.WEEK_OF_YEAR); //semana actual
-		objCalendario.setTime(FechaI); //enviar la fecha recibida
-        int semanaTecnico = objCalendario.get(Calendar.WEEK_OF_YEAR)-1; // semana de la fecha del tecnico
-		return semanaTecnico;
-		
+	
 		//int mes = objCalendario.get(Calendar.MONTH)+1;
 		//int dia = objCalendario.get(Calendar.DATE);
        // int annio = objCalendario.get(Calendar.YEAR);
-	}*/
+	
 	
 	/*
 	@GetMapping("/prueba")
