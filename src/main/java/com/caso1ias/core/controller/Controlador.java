@@ -28,14 +28,16 @@ public class Controlador {
 	//---------------Modulo de Reporte de Servicio---------
 	@PostMapping("/reporte")
 	public String agregar(@Valid @RequestBody Reporte r, BindingResult result) throws ParseException {
-		//------Validacion de errores----
+		
+		//------Validacion de errores-------
 		if(result.hasErrors()) {
 			List<FieldError> errores = result.getFieldErrors();
 		    for (FieldError error : errores ) {
 		        return (error.getDefaultMessage());
 		    }
 		}
-		//Validacion de datos
+		
+		//-------Validacion de datos-------------
 		String fecha1=r.getFecha_inicio(),fecha2=r.getFecha_fin(),hora1=r.getHora_inicio(),hora2=r.getHora_fin();
 		Reglas_de_Negocio RN=new Reglas_de_Negocio();
 		String respuesta=RN.Validaciones(fecha1,fecha2,hora1,hora2);
@@ -46,6 +48,7 @@ public class Controlador {
 			return respuesta;
 		}
 	}
+	
 	//---------------Modulo de Calculo de horas de trabajo--------------
 	@GetMapping("/recibir/{idtecnico}/{numsemana}")
 	public List<String> listarId(@PathVariable("idtecnico") String idtecnico,@PathVariable("numsemana") String numsemana) throws ParseException{
@@ -59,7 +62,4 @@ public class Controlador {
 		}
 		return horas;
 	}
-	//int mes = objCalendario.get(Calendar.MONTH)+1;
-	//int dia = objCalendario.get(Calendar.DATE);
-    //int annio = objCalendario.get(Calendar.YEAR);
 }
