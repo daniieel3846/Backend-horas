@@ -42,13 +42,25 @@ public class Reporte {
 	@Column
 	private String hora_fin;
 	
+	public Reporte(
+			@NotEmpty(message = "El campo ID Técnico esta vacio") @NotNull(message = "El ID del Técnico es obligatorio*") String idtecnico,
+			@NotEmpty(message = "El campo ID Servicio esta vacio") @NotNull(message = "El ID del Servicio es obligatorio*") String idservicio,
+			@NotEmpty(message = "El campo ID fecha inicio esta vacio") @NotNull(message = "La fecha de inicio es obligatoria*") String fecha_inicio,
+			@NotEmpty(message = "El campo hora inicio esta vacio") @NotNull(message = "La hora de inicio es obligatoria*") String hora_inicio,
+			@NotEmpty(message = "El campo fecha fin esta vacio") @NotNull(message = "La fecha de fin es obligatoria*") String fecha_fin,
+			@NotEmpty(message = "El campo hora fin esta vacio") @NotNull(message = "La hora de fin es obligatoria*") String hora_fin) {
+		super();
+		this.idtecnico = idtecnico;
+		this.idservicio = idservicio;
+		this.fecha_inicio = fecha_inicio;
+		this.hora_inicio = hora_inicio;
+		this.fecha_fin = fecha_fin;
+		this.hora_fin = hora_fin;
+	}
 	public Reporte() {
 	}
 	public int getId() {
 		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
 	}
 	public String getIdtecnico() {
 		return idtecnico;
