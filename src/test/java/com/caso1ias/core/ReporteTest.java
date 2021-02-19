@@ -17,12 +17,14 @@ public class ReporteTest {
 	
 	@Autowired
 	private ReporteRepository repositorio;
+	
 	@Test
 	public void TestCreateReporte() {
 		Reporte report=new Reporte("1","1","2021-02-08","07:00","2021-02-08","15:00");
 		repositorio.save(report);
 		assertNotNull(report);
 	}
+	
 	@Test
 	public void Find_Week_Year() throws ParseException {
 		String fecha="2021-02-15";

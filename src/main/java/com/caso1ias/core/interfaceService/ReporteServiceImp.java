@@ -9,10 +9,13 @@ import com.caso1ias.core.model.Reporte;
 import com.caso1ias.core.repository.ReporteRepository;
 import com.caso1ias.core.service.ReporteService;
 
+
 @Service
 public class ReporteServiceImp implements ReporteService {
+	
+	
 	@Autowired
-	private ReporteRepository repositorio;
+	ReporteRepository repositorio;
 	
 	@Override
 	public Reporte agregar(Reporte r) {
